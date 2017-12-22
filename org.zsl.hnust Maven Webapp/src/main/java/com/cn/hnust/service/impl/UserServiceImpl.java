@@ -1,6 +1,7 @@
 package com.cn.hnust.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -74,6 +75,36 @@ public class UserServiceImpl implements IUserService {
 	public List<User> fingBylike(String name) {
 		
 		return this.userDao.findBylike(name);
+	}
+
+
+
+	@Override
+	public List<User> select(Integer id) {
+		
+		return this.userDao.select( id);
+	}
+
+
+
+	@Override
+	public int update(User user) {
+		
+		return  userDao.updateByPrimaryKey(user);
+	}
+
+
+
+	@Override
+	public User selectByIdAndUserName(Integer id, String userName) {
+		return  userDao.selectByIdAndUserName(id, userName);
+	}
+
+
+
+	@Override
+	public User selectByIdAndUserName(Map<String, Object> map) {
+		return userDao.selectByIdAndUserName(map);
 	}
 
 }

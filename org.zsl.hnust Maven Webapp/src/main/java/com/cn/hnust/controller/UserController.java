@@ -28,7 +28,7 @@ public class UserController {
 		model.addAttribute("user", user);
 		return "showUser";
 	}
-
+	
 	@RequestMapping("/insert")
 	public void toInsert(HttpServletRequest request, Model model) {
 		User user = new User();

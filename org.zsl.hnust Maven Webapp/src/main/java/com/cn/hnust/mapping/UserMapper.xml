@@ -1,117 +1,138 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.cn.hnust.dao.IUserDao" >
-  <resultMap id="BaseResultMap" type="com.cn.hnust.pojo.User" >
-    <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="user_name" property="userName" jdbcType="VARCHAR" />
-    <result column="password" property="password" jdbcType="VARCHAR" />
-    <result column="age" property="age" jdbcType="INTEGER" />
-  </resultMap>
-  
-  <sql id="Base_Column_List" >
-    id, user_name, password, age
-  </sql>
-  
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
-    <include refid="Base_Column_List" />
-    from user_t
-    where id = #{id,jdbcType=INTEGER}
-  </select>
-  
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
-    delete from user_t
-    where id = #{id,jdbcType=INTEGER}
-  </delete>
-  
-  <insert id="insert" parameterType="com.cn.hnust.pojo.User" >
-    insert into user_t (id, user_name, password, 
-      age)
-    values (#{id,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{age,jdbcType=INTEGER})
-  </insert>
-  
-<!--   动态sql语句 -->
-  <insert id="insertSelective" parameterType="com.cn.hnust.pojo.User" >
-    insert into user_t
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        id,
-      </if>
-      <if test="userName != null" >
-        user_name,
-      </if>
-      <if test="password != null" >
-        password,
-      </if>
-      <if test="age != null" >
-        age,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="userName != null" >
-        #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null" >
-        #{password,jdbcType=VARCHAR},
-      </if>
-      <if test="age != null" >
-        #{age,jdbcType=INTEGER},
-      </if>
-    </trim>
-  </insert>
-  
-  
-  <update id="updateByPrimaryKeySelective" parameterType="com.cn.hnust.pojo.User" >
-    update user_t
-    <set >
-      <if test="userName != null" >
-        user_name = #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null" >
-        password = #{password,jdbcType=VARCHAR},
-      </if>
-      <if test="age != null" >
-        age = #{age,jdbcType=INTEGER},
-      </if>
-    </set>
-    where id = #{id,jdbcType=INTEGER}
-  </update>
-  
-  
-  
-  
-  <update id="updateByPrimaryKey" parameterType="com.cn.hnust.pojo.User" >
-    update user_t
-    set user_name = #{userName,jdbcType=VARCHAR},
-      password = #{password,jdbcType=VARCHAR},
-      age = #{age,jdbcType=INTEGER}
-    where id = #{id,jdbcType=INTEGER}
-  </update>
-  
-  
-<!--   当ID为list时 collection="list"
-  当ID为数组时collection="array"
-  当查询的参数为不同属性的多个时，需要用map集合       collection="map的key"
-   -->
-  <select id="findByIds" parameterType="java.util.List"  resultMap="BaseResultMap">
-  select 
-    <include refid="Base_Column_List" />
-    from user_t where id in
-    <foreach item="item" index="index" collection="list" open="("  separator=","  close=")">
-     #{item}
-    </foreach>
-  </select>
-  
-  <select id="findBylike"   parameterType="java.lang.String"   >
- 
-  select 
-   <include refid="Base_Column_List" />
-      from user_t where user_name like #{userName}
-   
-  </select>
-  
+<mapper namespace="com.cn.hnust.dao.IUserDao">
+	<!-- namespace指的是接口的全类名 -->
+	<resultMap id="BaseResultMap" type="com.cn.hnust.pojo.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+	</resultMap>
+	<!-- 只有一个参数id -->
+	<select id="select" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		id,password,age
+		from userInfo where id = #{id,jdbcType=INTEGER}
+	<!-- 有两个以上参数   在 dao的方法中需要在参数前面加上@Param("####")注解-->
+	</select>
+		<select id="selectByIdAndUserName" resultMap="BaseResultMap" >
+		select 
+		user_name,id,password,age
+		from userInfo where id = #{id,jdbcType=INTEGER} and user_name=#{userName}
+	</select>
+	
+	<sql id="Base_Column_List">
+		id, user_name, password, age
+	</sql>
+	<!-- id指的是接口中的方法 -->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from userInfo
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from userInfo
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<!-- parameterType 参数类型，是可以省略的 keyProperty：查出的主键值封装给javabean的哪个属性 对于支持自增的数据库 
+		useGeneratedKeys="true" keyProperty="id" 表示 id是自增的 对于不支持自增的数据库比如Oracle，可以用序列代替 -->
+	<insert id="insert" parameterType="com.cn.hnust.pojo.User"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into userInfo ( user_name, password,
+		age)
+		values ( #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+		#{age,jdbcType=INTEGER})
+	</insert>
+
+	<!-- oracle 创建表序列 create sequence user_info_id_seq start with 1 increment 
+		by 1 nomaxvalue nominvalue nocycle nocache; -->
+	<!-- Oracle id获取 -->
+	<!-- <insert id="insert" parameterType="com.cn.hnust.pojo.User" > <selectKey 
+		keyProperty="id" order="before"> SELECT user_info_id_seq.nextval from dual </selectKey> 
+		insert into user_info (id, user_name, password, age) values (#{id}, #{userName,jdbcType=VARCHAR}, 
+		#{password,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER}) </insert> -->
+	<!-- 动态sql语句 -->
+	<insert id="insertSelective" parameterType="com.cn.hnust.pojo.User">
+		insert into userInfo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="userName != null">
+				user_name,
+			</if>
+			<if test="password != null">
+				password,
+			</if>
+			<if test="age != null">
+				age,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="userName != null">
+				#{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				#{password,jdbcType=VARCHAR},
+			</if>
+			<if test="age != null">
+				#{age,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<!-- 参数为User对象，#{userName,jdbcType=VARCHAR}，userName为实体类中属性 在不设置字段值时，会修改数据库中该字段为空 
+		如果为动态修改参考updateByPrimaryKeySelective parameterType：可以省略不要 -->
+	<update id="updateByPrimaryKey">
+		update userInfo
+		set user_name = #{userName,jdbcType=VARCHAR},
+		password = #{password,jdbcType=VARCHAR},
+		age = #{age,jdbcType=INTEGER}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateByPrimaryKeySelective" parameterType="com.cn.hnust.pojo.User">
+		update userInfo
+		<set>
+			<if test="userName != null">
+				user_name = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="age != null">
+				age = #{age,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+
+
+
+
+
+	<!-- 当ID为list时 collection="list" 当ID为数组时collection="array" 当查询的参数为不同属性的多个时，需要用map集合 
+		collection="map的key" -->
+	<select id="findByIds" parameterType="java.util.List" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from userInfo where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findBylike" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from userInfo where user_name like #{userName}
+	</select>
+
 </mapper>
