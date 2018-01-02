@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.cn.hnust.dao.IUserDao">
-	<!-- namespace指的是接口的全类名 -->
+	<!-- namespace指的是接口的全类名,接口和xml文件之间的关联 -->
 	<resultMap id="BaseResultMap" type="com.cn.hnust.pojo.User">
+	<!-- 指定主键的封装规则 ,也可以用result  不过使用id底层会有优化-->
 		<id column="id" property="id" jdbcType="INTEGER" />
 		<result column="user_name" property="userName" jdbcType="VARCHAR" />
 		<result column="password" property="password" jdbcType="VARCHAR" />
@@ -13,17 +14,21 @@
 		select
 		id,password,age
 		from userInfo where id = #{id,jdbcType=INTEGER}
-	<!-- 有两个以上参数   在 dao的方法中需要在参数前面加上@Param("####")注解-->
+	<!-- 有两个以上参数   在 dao的方法中需要在参数前面加上@Param("####")注解
+	     ${userInfo}和#{userInfo}除了有编译区别外，${}可以使用占位符，但是#{}不行
+	-->
 	</select>
 		<select id="selectByIdAndUserName" resultMap="BaseResultMap" >
 		select 
 		user_name,id,password,age
-		from userInfo where id = #{id,jdbcType=INTEGER} and user_name=#{userName}
+		from ${userInfo} where id = #{id,jdbcType=INTEGER} and user_name=#{userName}
 	</select>
-	
+	<!-- 抽取可重用的部分 -->
 	<sql id="Base_Column_List">
 		id, user_name, password, age
 	</sql>
+	
+	
 	<!-- id指的是接口中的方法 -->
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Integer">
@@ -33,10 +38,14 @@
 		where id = #{id,jdbcType=INTEGER}
 	</select>
 
+
+
 	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
 		delete from userInfo
 		where id = #{id,jdbcType=INTEGER}
 	</delete>
+	
+	
 	<!-- parameterType 参数类型，是可以省略的 keyProperty：查出的主键值封装给javabean的哪个属性 对于支持自增的数据库 
 		useGeneratedKeys="true" keyProperty="id" 表示 id是自增的 对于不支持自增的数据库比如Oracle，可以用序列代替 -->
 	<insert id="insert" parameterType="com.cn.hnust.pojo.User"
@@ -86,6 +95,8 @@
 			</if>
 		</trim>
 	</insert>
+	
+	
 	<!-- 参数为User对象，#{userName,jdbcType=VARCHAR}，userName为实体类中属性 在不设置字段值时，会修改数据库中该字段为空 
 		如果为动态修改参考updateByPrimaryKeySelective parameterType：可以省略不要 -->
 	<update id="updateByPrimaryKey">
@@ -95,6 +106,8 @@
 		age = #{age,jdbcType=INTEGER}
 		where id = #{id,jdbcType=INTEGER}
 	</update>
+
+
 
 	<update id="updateByPrimaryKeySelective" parameterType="com.cn.hnust.pojo.User">
 		update userInfo
@@ -117,8 +130,11 @@
 
 
 
-	<!-- 当ID为list时 collection="list" 当ID为数组时collection="array" 当查询的参数为不同属性的多个时，需要用map集合 
-		collection="map的key" -->
+	<!--
+	 当参数ID为list时 collection="list" 当ID为数组时collection="array" 
+	 当查询的参数为不同属性的多个时，需要用map集合，获取值为#{map的key} 
+	 当返回值为list时，resultMap还是返回集合中的属性类型
+	 -->
 	<select id="findByIds" parameterType="java.util.List" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
@@ -129,10 +145,24 @@
 		</foreach>
 	</select>
 
-	<select id="findBylike" parameterType="java.lang.String">
+
+	<select id="findBylike" parameterType="java.lang.String" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
 		from userInfo where user_name like #{userName}
 	</select>
+	
+	<select id="findByLikeReturnMap" resultMap="BaseResultMap" >
+		select
+		<include refid="Base_Column_List" />
+		from userInfo where user_name like #{userName}
+	</select>
+
+<select id="findDeptId" resultMap="BaseResultMap">
+select 
+<include refid="Base_Column_List" />
+  from userInfo where dept_id=#{deptId}
+</select>
+
 
 </mapper>

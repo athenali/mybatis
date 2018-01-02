@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cn.hnust.dao.resultMapDao">
+<!--     联合查询，级联查看结果集  dept.id -->
+       <resultMap id="BaseResultMap" type="com.cn.hnust.pojo.User">
+	<!-- 指定主键的封装规则 ,也可以用result  不过使用id  底层会有优化-->
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<result column="dept_id" property="dept.id" jdbcType="INTEGER" />
+		<result column="dept_name" property="dept.deptName" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 第二种方法  association 
+	第一种方法和第二种方法需要表关联着去查询
+	第三种方法是分布查询，查询得都是单张表
+	-->
+	    <resultMap id="BaseResultMap1" type="com.cn.hnust.pojo.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<!-- association：指定联合的javaben对象
+		       property：指定哪个属性是联合对象
+		       javaType：指定这个属性对象的类型（这里是不能省略的）
+		 -->
+		<association property="dept" javaType="com.cn.hnust.pojo.Dept">
+		<id column="dept_id" property="id" jdbcType="INTEGER" />
+		<result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	
+		<select id="findDept" resultMap="BaseResultMap1">
+	select u.id id,u.user_name user_name ,u.age age , u.dept_id dept_id  ,d.dept_name dept_name from userInfo u ,deptInfo d 
+	where u.dept_id=d.id and u.id=#{id}
+	</select>
+	
+	
+		<!-- 第三种方法  association   分布查询
+	优点：可以使用延迟加载
+	比如：在每次使用部分信息的时候再去查询数据库
+		-->
+	    <resultMap id="BaseResultMap3" type="com.cn.hnust.pojo.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<!-- column指select方法的参数 -->
+		<association property="dept" select="com.cn.hnust.dao.DeptDao.selectByPrimaryKey"
+		column="dept_id">
+		</association>
+	</resultMap>
+	<select id="findDept1" resultMap="BaseResultMap3">
+	select *  from  userInfo  where id=#{id}
+	</select>
+<!-- ===============场景一：：：：：：：上面是对association的使用    从一个用户去查一个部门的信息================================================ -->
+<!-- ================场景二：：：：：：：=下面介绍一个部门去查多个用户   在deptMapper.xml中进行操作================================= -->
+
+
+</mapper>

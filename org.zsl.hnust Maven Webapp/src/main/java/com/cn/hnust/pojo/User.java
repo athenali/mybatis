@@ -7,6 +7,8 @@ public class User {
     private String password;
 
     private Integer age;
+    
+    private Dept dept;
 
     public Integer getId() {
         return id;
@@ -39,4 +41,21 @@ public class User {
     public void setAge(Integer age) {
         this.age = age;
     }
+
+	public Dept getDept() {
+		return dept;
+	}
+
+	public void setDept(Dept dept) {
+		this.dept = dept;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", userName=" + userName + ", password=" + password + ", age=" + age + ", dept="
+				+ dept + "]";
+	}
+
+
+    
 }

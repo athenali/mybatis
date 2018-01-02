@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cn.hnust.dao.DeptDao">
+	<select id="selectByPrimaryKey" resultType="com.cn.hnust.pojo.Dept"
+		parameterType="java.lang.Integer">
+		select
+		id,dept_name as deptName
+		from deptInfo
+		where id =
+		#{id,jdbcType=INTEGER}
+		<!-- 方法一 使用表的级联关系 -->
+	</select>
+	<resultMap type="com.cn.hnust.pojo.Dept" id="BaseResult">
+		<id column="id" property="id" />
+		<result column="dept_name" property="deptName" />
+		<!-- collection ： 定义关联集合类型的属性 ofType：集合里面元素的类型 -->
+		<collection property="users" ofType="com.cn.hnust.pojo.User">
+			<id column="user_id" property="id" />
+			<result column="user_name" property="userName" />
+			<result column="age" property="age" />
+		</collection>
+	</resultMap>
+
+	<select id="selectByIdPlus" resultMap="BaseResult">
+		select d.id,d.dept_name,u.id as user_id ,u.user_name,u.age from deptinfo d
+		left join userinfo u on d.id=u.dept_id where d.id=#{id}
+	</select>
+
+	<!-- 方法二：：：：：：：：：分布加载 最后返回部门和用户的信息，一个部门包括很多的用户 -->
+	<resultMap type="com.cn.hnust.pojo.Dept" id="BaseResult1">
+		<id column="id" property="id" />
+		<result column="dept_name" property="deptName" />
+		<!-- collection ： 定义关联集合类型的属性 column：指select中方法的参数，如果是多个就把参数封装成map{key1=上面定义的column，key2=上面定义的column} 
+			这里演示封装为map -->
+		<collection property="users" select="com.cn.hnust.dao.IUserDao.findDeptId"
+			column="{deptId=id}">
+		</collection>
+	</resultMap>
+	<select id="getUsers" resultMap="BaseResult1">
+		select * from deptinfo where id=#{id}
+	</select>
+	<!-- 使用鉴别器 如果id为1，输出用户信息， 如果id为2,，不输出用户信息并把dept_name的值换成id的值 -->
+	<resultMap type="com.cn.hnust.pojo.Dept" id="BaseResult2">
+		<id column="id" property="id" />
+		<result column="dept_name" property="deptName" />
+		<discriminator javaType="Integer" column='id'>
+			<!-- resultType 返回结果的类型 ，这里不可省略 -->
+			<case value="1" resultType="com.cn.hnust.pojo.Dept">
+				<collection property="users"
+					select="com.cn.hnust.dao.IUserDao.findDeptId" column="{deptId=id}">
+				</collection>
+			</case>
+			<case value="2" resultType="com.cn.hnust.pojo.Dept">
+				<result column="dept_name" property="id" />
+			</case>
+		</discriminator>
+	</resultMap>
+	<select id="getdiscriminator" resultMap="BaseResult2">
+		select * from deptinfo where id=#{id}
+	</select>
+
+	<!-- 动态添加if判断 test 里面是对参数的判断， 有些字段需要变成转义字符比如 && 地址为：http://www.w3school.com.cn/tags/html_ref_entities.html -->
+	<select id="getDynamic" resultMap="BaseResult1">
+		select id,dept_name from deptinfo
+		<if test="message ='yes'"></if>
+	</select>
+	<!-- trim 
+	prefix：在最终的结果上加上前缀比如where 
+	suffixOverrides:在最终的结果上去掉最后的后缀比如and
+	 -->
+	<select id="getDynamicTrim" resultMap="BaseResult1">
+		select id,dept_name from deptinfo
+		<trim prefix="where" suffixOverrides="and">
+			<if test="id !=''">
+				id=#{id} and
+			</if>
+			<if test="deptName!=''">
+				dept_name=#{deptName} and
+			</if>
+		</trim>
+	</select>
+	<!-- choose  when  otherwise -->
+	<select id="getDynamicChoose" resultMap="BaseResult1">
+		select id,dept_name from deptinfo  where 1=1
+		<choose>
+		<when test="id !=null ">
+		and  id=#{id} 
+		</when>
+		<otherwise>
+		 and  dept_name=#{deptName}
+		</otherwise>
+		</choose>
+	</select>
+	<!-- foreach 
+	collection="参数名" 时需要在参数前面加上@param， 
+	collection="list/map/array" 时不需要在参数前面加上@param， 
+	注意和 List<User> findByIds(List<Integer> ids)的区别;
+	-->
+	<select id="getDynamicForeach" resultMap="BaseResult1"  parameterType="java.util.List">
+	select *  from  deptinfo  where  id in 
+	<foreach collection="ids" item="id"  open="("  close=")"  separator=",">
+	#{id}
+	</foreach>
+	</select>
+	
+	<insert id="saveList">
+	insert into deptinfo (dept_name) values
+	<foreach collection="depts" separator="," item="dept"  >
+	(#{dept.deptName})
+	</foreach>
+	</insert>
+</mapper>

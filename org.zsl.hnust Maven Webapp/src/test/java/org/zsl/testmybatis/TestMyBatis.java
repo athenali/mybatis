@@ -35,6 +35,8 @@ public class TestMyBatis {
 //	private ApplicationContext ac = null;
 	@Resource
 	private IUserService userService = null;
+	@Resource
+	private IUserDao userDao;
 	@Test
 	public void test1() throws IOException {
       List<Integer> ids=new ArrayList<>();
@@ -72,7 +74,35 @@ public class TestMyBatis {
 	Map<String, Object> map=new HashMap<>();
 	map.put("id", 2);
 	map.put("userName", "34");
+	map.put("userInfo", "userInfo");
 	User user = userService.selectByIdAndUserName(map);
 	System.out.println(user.getPassword()+"==========="+user.getUserName());
+	}
+	@Test
+	public void findBylike(){
+		String userName="%3%";
+		List<User> findBylike = userDao.findBylike(userName);
+		System.out.println(findBylike);
+	}
+	@Test
+    public  void findByLikeReturnMap(){
+		String userName="%3%";
+		Map<String, List<User>> findByLikeReturnMap = userDao.findByLikeReturnMap(userName);
+		System.out.println(findByLikeReturnMap);
+	}
+	
+	@Test
+	public  void findDeptId(){
+		List<User> findDeptId = userDao.findDeptId(1);
+		System.out.println(findDeptId);
+	}
+	
+	@Test
+	public void findByIds(){
+		List<Integer> ids=new ArrayList<>();
+		ids.add(2);
+		ids.add(3);
+		List<User> findByIds = userDao.findByIds(ids);
+		System.out.println(findByIds);
 	}
 }
